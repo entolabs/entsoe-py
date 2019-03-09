@@ -287,7 +287,7 @@ class EntsoeRawClient:
 
         response = self.base_request(params=params, start=start, end=end)
         return response.text
-    
+
     def query_generation_per_plant(self, country_code, start, end, psr_type=None, lookup_bzones=False):
         """
         Parameters
@@ -346,7 +346,7 @@ class EntsoeRawClient:
         response = self.base_request(params=params, start=start, end=end)
         return response.text
 
-    def query_crossborder_flows(self, country_code_from, country_code_to, start, end):
+    def query_crossborder_flows(self, country_code_from, country_code_to, start, end, lookup_bzones_from=False, lookup_bzones_to=False):
         """
         Parameters
         ----------
@@ -354,13 +354,26 @@ class EntsoeRawClient:
         country_code_to : str
         start : pd.Timestamp
         end : pd.Timestamp
+        lookup_bzones_from : bool
+            if True, country_code_from is expected to be a bidding zone
+        lookup_bzones_to : bool
+            if True, country_code_to is expected to be a bidding zone
+
 
         Returns
         -------
         str
         """
-        domain_in = DOMAIN_MAPPINGS[country_code_to]
-        domain_out = DOMAIN_MAPPINGS[country_code_from]
+
+        if not lookup_bzones_from:
+            domain_out = DOMAIN_MAPPINGS[country_code_from]
+        else:
+            domain_out = BIDDING_ZONES[country_code_from]
+        if not lookup_bzones_to:
+            domain_in = DOMAIN_MAPPINGS[country_code_to]
+        else:
+            domain_in = BIDDING_ZONES[country_code_to]
+
         params = {
             'documentType': 'A11',
             'in_Domain': domain_in,
@@ -620,7 +633,7 @@ class EntsoePandasClient(EntsoeRawClient):
         return df
 
     @year_limited
-    def query_crossborder_flows(self, country_code_from, country_code_to, start, end):
+    def query_crossborder_flows(self, country_code_from, country_code_to, start, end, lookup_bzones_from=False, lookup_bzones_to=False):
         """
         Note: Result will be in the timezone of the origin country
 
@@ -637,7 +650,9 @@ class EntsoePandasClient(EntsoeRawClient):
         """
         text = super(EntsoePandasClient, self).query_crossborder_flows(
             country_code_from=country_code_from,
-            country_code_to=country_code_to, start=start, end=end)
+            country_code_to=country_code_to, start=start, end=end,
+            lookup_bzones_from=lookup_bzones_from,
+            lookup_bzones_to=lookup_bzones_to)
         ts = parse_crossborder_flows(text)
         ts = ts.tz_convert(TIMEZONE_MAPPINGS[country_code_from])
         return ts

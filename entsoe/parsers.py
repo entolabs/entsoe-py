@@ -72,6 +72,8 @@ def parse_generation(xml_text):
         series = all_series.get(ts.name)
         if series is None:
             all_series[ts.name] = ts
+        elif 'storage' in ts.name.lower():
+            all_series[f'{ts.name} Charge'] = -ts
         else:
             series = series.append(ts)
             series.sort_index()
@@ -252,7 +254,7 @@ def _parse_generation_forecast_timeseries(soup):
 
     series.name = PSRTYPE_MAPPINGS[psrtype]
     return series
-	
+
 def _parse_generation_forecast_timeseries_per_plant(soup):
     """
     Parameters

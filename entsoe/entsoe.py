@@ -505,7 +505,7 @@ class EntsoePandasClient(EntsoeRawClient):
         return series
 
     @year_limited
-    def query_load(self, country_code, start, end) -> pd.Series:
+    def query_load(self, country_code, start, end, local_time=True) -> pd.Series:
         """
         Parameters
         ----------
@@ -520,7 +520,8 @@ class EntsoePandasClient(EntsoeRawClient):
         text = super(EntsoePandasClient, self).query_load(
             country_code=country_code, start=start, end=end)
         series = parse_loads(text)
-        series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return series
 
     @year_limited
@@ -586,7 +587,7 @@ class EntsoePandasClient(EntsoeRawClient):
 
     @year_limited
     def query_generation(self, country_code, start, end, psr_type=None,
-                         lookup_bzones=False):
+                         lookup_bzones=False, local_time=True):
         """
         Parameters
         ----------
@@ -606,7 +607,8 @@ class EntsoePandasClient(EntsoeRawClient):
             country_code=country_code, start=start, end=end, psr_type=psr_type,
             lookup_bzones=lookup_bzones)
         df = parse_generation(text)
-        df = df.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            df = df.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return df
 
     @year_limited
@@ -633,7 +635,7 @@ class EntsoePandasClient(EntsoeRawClient):
         return df
 
     @year_limited
-    def query_crossborder_flows(self, country_code_from, country_code_to, start, end, lookup_bzones_from=False, lookup_bzones_to=False):
+    def query_crossborder_flows(self, country_code_from, country_code_to, start, end, lookup_bzones_from=False, lookup_bzones_to=False, local_time=True):
         """
         Note: Result will be in the timezone of the origin country
 
@@ -654,7 +656,8 @@ class EntsoePandasClient(EntsoeRawClient):
             lookup_bzones_from=lookup_bzones_from,
             lookup_bzones_to=lookup_bzones_to)
         ts = parse_crossborder_flows(text)
-        ts = ts.tz_convert(TIMEZONE_MAPPINGS[country_code_from])
+        if local_time:
+            ts = ts.tz_convert(TIMEZONE_MAPPINGS[country_code_from])
         return ts
 
     @year_limited

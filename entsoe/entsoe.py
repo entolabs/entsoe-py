@@ -486,7 +486,7 @@ def year_limited(func):
 
 class EntsoePandasClient(EntsoeRawClient):
     @year_limited
-    def query_day_ahead_prices(self, country_code, start, end) -> pd.Series:
+    def query_day_ahead_prices(self, country_code, start, end, local_time=True) -> pd.Series:
         """
         Parameters
         ----------
@@ -501,7 +501,8 @@ class EntsoePandasClient(EntsoeRawClient):
         text = super(EntsoePandasClient, self).query_day_ahead_prices(
             country_code=country_code, start=start, end=end)
         series = parse_prices(text)
-        series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return series
 
     @year_limited

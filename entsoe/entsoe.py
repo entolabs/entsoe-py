@@ -526,7 +526,7 @@ class EntsoePandasClient(EntsoeRawClient):
         return series
 
     @year_limited
-    def query_load_forecast(self, country_code, start, end) -> pd.Series:
+    def query_load_forecast(self, country_code, start, end, local_time=True) -> pd.Series:
         """
         Parameters
         ----------
@@ -540,11 +540,12 @@ class EntsoePandasClient(EntsoeRawClient):
         text = super(EntsoePandasClient, self).query_load_forecast(
             country_code=country_code, start=start, end=end)
         series = parse_loads(text)
-        series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return series
 
     @year_limited
-    def query_generation_forecast(self, country_code, start, end) -> pd.Series:
+    def query_generation_forecast(self, country_code, start, end, local_time=True) -> pd.Series:
         """
         Parameters
         ----------
@@ -558,12 +559,13 @@ class EntsoePandasClient(EntsoeRawClient):
         text = super(EntsoePandasClient, self).query_generation_forecast(
             country_code=country_code, start=start, end=end)
         series = parse_loads(text)
-        series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            series = series.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return series
 
     @year_limited
     def query_wind_and_solar_forecast(self, country_code, start, end, psr_type=None,
-                                      lookup_bzones=False):
+                                      lookup_bzones=False, local_time=True):
         """
         Parameters
         ----------
@@ -583,7 +585,8 @@ class EntsoePandasClient(EntsoeRawClient):
             country_code=country_code, start=start, end=end, psr_type=psr_type,
             lookup_bzones=lookup_bzones)
         df = parse_generation(text)
-        df = df.tz_convert(TIMEZONE_MAPPINGS[country_code])
+        if local_time:
+            df = df.tz_convert(TIMEZONE_MAPPINGS[country_code])
         return df
 
     @year_limited
